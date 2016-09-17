@@ -49,12 +49,12 @@ foreach ($json as $key => $item) {
 		$first = $item;
 	}
 	if ($prev === null) {
-		$prev = $item;
 		$json[$key]['distance-total'] = 0.0;
 		$json[$key]['speed'] = 0.0;
 		$json[$key]['travel-time'] = 0;
 		$json[$key]['distance-air'] = 0.0;
 		$json[$key]['distance-diff'] = 0.0;
+		$prev = $json[$key];
 		continue;
 	}
 	$json[$key]['distance-diff'] = getDistance($prev, $item);
