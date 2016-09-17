@@ -13,24 +13,6 @@ var currentMarker;
 var legend;
 var button_refresh;
 
-var custom_arr_default = [
-	{'title':'Compass', 'val':0, 'factor':1, 'sym': '&deg;'},
-	{'title':'Battery Voltage', 'val':0, 'factor':0.1, 'sym': ' V'},
-	{'title':'Amps', 'val':0, 'factor':0.1, 'sym': ' A'},
-	{'title':'Water Temperature', 'val':0, 'factor':1, 'sym': ' &deg;C'},
-	{'title':'Inside Humidity', 'val':0, 'factor':10, 'sym': '%'},
-	{'title':'Inside Temperature', 'val':0, 'factor':1, 'sym': ' &deg;C'},
-	{'title':'Wind Angle', 'val':0, 'factor':1, 'sym': '&deg'},
-	{'title':'Wind Speed', 'val':0, 'factor':0.1, 'sym': ' m/s'},
-	{'title':'Air Temperature', 'val':0, 'factor':1, 'sym': ' &deg;C'},
-//	{'title':'GPS Speed', 'val':0, 'factor':0.1, 'sym': ' m/s'},
-//	{'title':'GPS Satellites', 'val':0, 'factor':1, 'sym': ''},
-//	{'title':'GPS HDOP', 'val':0, 'factor':0.1, 'sym': ''},
-//	{'title':'Rudder', 'val':0, 'factor':10, 'sym': ''},
-//	{'title':'Next Waypoint', 'val':0, 'factor':1, 'sym': ''},
-//	{'title':'CPU Uptime', 'val':0, 'factor':1, 'sym': ' min'}
-];
-
 $.ajaxSetup({
 	type: "GET",
 	headers: {"If-Modified-Since": "Sat, 1 Jan 2005 00:00:00 GMT"},
@@ -263,7 +245,7 @@ function handleMouse(item) {
 
 function setCurrentMarker(point) {
 	//TODO: nacitanie a zobrazenie info v legende
-	legend.setData(point);
+	legend.setText(opentransat.prepareLegend(point));
 	return currentMarker.setLatLng([point['gps_lat'], point['gps_lng']]);
 }
 
