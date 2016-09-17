@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
+<meta name="viewport" content="initial-scale=1.0" />
+<title>OpenTransat</title>
+
+<link type="text/css" rel="stylesheet" href="leaflet.css" />
+<link type="text/css" rel="stylesheet" href="main.css" />
+<script type='text/javascript' src='js/leaflet.js'></script>
+<script type='text/javascript' src='js/jquery.min.js'></script>
+<script type='text/javascript' src='js/opentransat_common.js'></script>
+<script type='text/javascript' src='js/leaflet_legend.js'></script>
+<script type='text/javascript' src='js/leaflet_zoom.js'></script>
+<script type='text/javascript' src='js/map.js'></script>
+</head>
+
+<body>
+<div id="mainPanel">
+<div id="logo"></div>
+<ul id="tabs">
+	<li id="menu-map">Map</li>
+	<li id="menu-stats">Stats</li>
+	<li id="menu-about">About</li>
+</ul>
+<ul id="action-buttons">
+	<li id="button-toggle-music" title="Toggle background music">&#x266B;</li>
+	<li id="button-toggle-notify" title="Toggle notifications">&#x26a0;</li>
+	<li id="button-refresh" title="Refresh data">&#x21bb;</li>
+</ul>
+</div>
+<div id="map"></div>
+<script type="text/javascript">
+$(document).ready(initMap);
+</script>
+</body>
+</html>
