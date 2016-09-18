@@ -79,6 +79,14 @@ html, body {
 .map-legend.small .content {
 	display: none;
 }
+.map-legend .content .right {
+	float: right;
+	margin-left: 15px;
+}
+
+.map-legend .content {
+	max-width: 600px;
+}
 
 .leaflet-control-zoom .rotated {
 	-ms-transform: rotate(-90deg); /* IE 9 */

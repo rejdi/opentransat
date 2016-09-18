@@ -78,6 +78,9 @@ var opentransat = {
 		}
 		
 		content += '<div><b>Time: </b>'+data['transmit_time']+' GMT ('+agostr+' ago)</div><div><b>Coordinates: </b>'+gps_lat.toFixed(4)+', '+gps_lng.toFixed(4)+'</div><div><b>Network: </b>'+network+'</div>';
+		if (data['battery']) {
+			content += '<div><b>Battery: </b>'+ data['battery'] + '</div>';
+		}
 		
 		content += '<div><b>Estimated boat speed:</b> ' + data['speed'].toFixed(2) + ' km/h (' + Math.round(data['speed']*9/4.63 * 10)/10 + ' knots)</div>';
 		content += '<div><b>Estimated distance:</b> ' + (data['distance-total'] / 1000.0).toFixed(2) + ' km (' + (data['distance-air'] / 1000.0).toFixed(2) + ' km air line, ' + travelTimeStr + ')</div>';
@@ -87,7 +90,7 @@ var opentransat = {
 				if (custom_arr_val[i] != '')
 					custom_arr[i]['val'] = custom_arr_val[i];
 			}
-			
+
 			for (var i in custom_arr) {
 				var title = custom_arr[i]['title'];
 				var value = custom_arr[i]['val'];
@@ -124,6 +127,14 @@ var opentransat = {
 		}
 
 	  	content += '</div>';
+	  	return content;
+    },
+
+    prepareComment: function(comment) {
+    	var content = '<div class="content">';
+    	content += '<div><strong>' + comment[2] + '</strong></div>';
+    	content += '<div>' + comment[3] + '</div>';
+    	content += '</div>';
 	  	return content;
     }
 };

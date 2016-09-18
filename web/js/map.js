@@ -7,6 +7,7 @@ var music = new Audio('music.webm');
 
 var lines;		//single layer for all lines
 var markers;	//each act as a layer
+var comments;
 var dataLayer;
 var map;
 var currentMarker;
@@ -82,6 +83,7 @@ function initMap() {
 
 	lines = L.polyline([], {color: 'red', clickable: false});
 	markers = [];
+	comments = [];
 	dataLayer = L.layerGroup([lines]).addTo(map);
 
 	L.control.scale().addTo(map);
@@ -154,7 +156,7 @@ function updateData() {
 		button_refresh.css('color','black');
 		button_refresh.html('&#x21bb; ' + opentransat.secToTime(update_interval_sec));
 
-		var len = Object.size(data),
+		var len = Object.size(data) - 1,
 			diff = len - markers.length;
 
 		//we have new data - make some noise(!)
@@ -169,12 +171,20 @@ function updateData() {
 			item.clearAllEventListeners();
 		});
 
+		comments.forEach(function(item) {
+			item.clearAllEventListeners();
+		});
+
 		markers = [];
+		comments = [];
 
 		var polyLines = [];
 		var latlng;
 		var marker;
 		for (var i in data) {
+			if (i == 'comments') {
+				continue;
+			}
 			var p = data[i];
 
 			latlng = L.latLng(p['gps_lat'], p['gps_lng']);
@@ -184,10 +194,18 @@ function updateData() {
 			markers.push(marker);
 		}
 
+		if (data['comments']) {
+			data['comments'].forEach(function(comment) {
+				var commentMarker = createCommentMarker(comment);
+				commentMarker.addTo(dataLayer);
+				comments.push(commentMarker);
+			});
+		}
+
 		lines.setLatLngs(polyLines);
 
 		if (diff > 0) {
-			setCurrentMarker(markers[markers.length-1].my_data);
+			setCurrentMarker(markers[markers.length-1].my_data, 'mark');
 		}
 		currentMarker.addTo(dataLayer).bringToBack();
 		lines.bringToBack();
@@ -233,20 +251,42 @@ function createMarker(item) {
 		weight: 10
 	});
 	marker.my_data = item;
+	marker.type = 'mark';
 	marker.on('mouseover', handleMouse);
 	marker.on('click', handleMouse);
 	//chytat eventy
 	return marker;
 }
 
-function handleMouse(item) {
-	setCurrentMarker(item.target.my_data);
+function createCommentMarker(item) {
+	var commentMarker =	L.marker([item[0], item[1]]);
+	commentMarker.my_data = item;
+	commentMarker.type = 'comment';
+	commentMarker.on('mouseover', handleMouse);
+	commentMarker.on('click', handleMouse);
+	
+	return commentMarker;
 }
 
-function setCurrentMarker(point) {
-	//TODO: nacitanie a zobrazenie info v legende
-	legend.setText(opentransat.prepareLegend(point));
-	return currentMarker.setLatLng([point['gps_lat'], point['gps_lng']]);
+function handleMouse(item) {
+	setCurrentMarker(item.target.my_data, item.target.type);
+}
+
+function setCurrentMarker(point, type) {
+	var lat, lng;
+	if (type == 'comment') {
+		legend.setText(opentransat.prepareComment(point));
+		lat = point[0];
+		lng = point[1];
+	}
+
+	if (type == 'mark') {
+		legend.setText(opentransat.prepareLegend(point));
+		lat = point['gps_lat'];
+		lng = point['gps_lng'];
+	}
+
+	return currentMarker.setLatLng([lat, lng]);
 }
 
 Object.size = function(obj) {

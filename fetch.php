@@ -38,13 +38,17 @@ function getSpeed($pos1, $pos2) {
 	return $d/$dt;
 }
 
-
-$data = file_get_contents("http://opentransat.com/data.php?pathid=0&_=1473926642087");
+$data = file_get_contents("http://track.opentransat.com/data.php?pathid=0&_=1473926642087");
 $json = json_decode($data,true);
 $prev = null;
 $first = null;
-unset($json['comments']);
 foreach ($json as $key => $item) {
+	if ($key == 'comments') {
+		foreach ($item as $index => $comment) {
+			$json[$key][$index] = fixLinks($comment);
+		}
+		continue;
+	}
 	if ($first === null) {
 		$first = $item;
 	}
@@ -63,6 +67,11 @@ foreach ($json as $key => $item) {
 	$json[$key]['speed'] = getSpeed($prev, $json[$key]);
 	$json[$key]['travel-time'] = strtotime($item['transmit_time']) - strtotime($first['transmit_time']);
 	$prev = $json[$key];
+}
+
+function fixLinks($comment) {
+	$comment[3] = str_replace('src=\'img/', 'src=\'http://track.opentransat.com/img/', $comment[3]);
+	return $comment;
 }
 
 //var_dump($json);
