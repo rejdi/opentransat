@@ -9,6 +9,7 @@ var lines;		//single layer for all lines
 var markers;	//each act as a layer
 var comments;
 var dataLayer;
+var commentsLayer;
 var map;
 var currentMarker;
 var legend;
@@ -60,7 +61,8 @@ function initMap() {
     		opacity: 0.5,
     		attribution: weatherAtt
 			});
-		
+
+	commentsLayer = L.layerGroup([]).addTo(map);
 
 	var baseLayers = {
 		'Ocean map': oceanBaseMap,
@@ -71,6 +73,7 @@ function initMap() {
 	};
 
 	var overlays = {
+		'Comments': commentsLayer,
 		'Clouds': clouds,
 		'Rain': rain
 	};
@@ -156,7 +159,7 @@ function updateData() {
 		button_refresh.css('color','black');
 		button_refresh.html('&#x21bb; ' + opentransat.secToTime(update_interval_sec));
 
-		var len = Object.size(data) - 1,
+		var len = Object.size(data) - (data['comments'] ? 1 : 0),
 			diff = len - markers.length;
 
 		//we have new data - make some noise(!)
@@ -166,6 +169,7 @@ function updateData() {
 
 		dataLayer.clearLayers();
 		dataLayer.addLayer(lines);
+		commentsLayer.clearLayers();
 
 		markers.forEach(function(item) {
 			item.clearAllEventListeners();
@@ -197,7 +201,7 @@ function updateData() {
 		if (data['comments']) {
 			data['comments'].forEach(function(comment) {
 				var commentMarker = createCommentMarker(comment);
-				commentMarker.addTo(dataLayer);
+				commentMarker.addTo(commentsLayer);
 				comments.push(commentMarker);
 			});
 		}
