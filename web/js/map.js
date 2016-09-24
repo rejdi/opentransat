@@ -14,6 +14,9 @@ var map;
 var currentMarker;
 var legend;
 var button_refresh;
+var state = {
+	particles: false
+};
 
 $.ajaxSetup({
 	type: "GET",
@@ -22,10 +25,19 @@ $.ajaxSetup({
 	timeout: 30000
 });
 
-function initMap() {
+function initMain(leafletmap) {
 	button_refresh = $('#button-refresh');
 
-	map = L.map('map', {unloadInvisibleTiles: true, reuseTiles: true, updateWhenIdle: true, zoomControl: false});
+	//map = L.map('map', {unloadInvisibleTiles: true, reuseTiles: true, updateWhenIdle: true, zoomControl: false});
+	map = leafletmap;
+
+	W.on('redrawFinished',function( displayedParams ) {
+          if (state.particles === false) {
+            W.animation.stop();
+          }
+    });
+
+    W.setOverlay('clouds');
 
 	var	weatherAtt = 'Map data © <a href="http://openweathermap.org/">OpenWeatherMap</a>',
 		oceanBaseMap = L.tileLayer(
@@ -82,7 +94,7 @@ function initMap() {
 	//add toggle
 	L.control.layers(baseLayers, overlays).addTo(map);
 	//add default layer
-	map.addLayer(osmBase);
+	map.addLayer(googleSatelite);
 
 	lines = L.polyline([], {color: 'red', clickable: false});
 	markers = [];
@@ -293,6 +305,9 @@ function setCurrentMarker(point, type) {
 		legend.setText(opentransat.prepareLegend(point));
 		lat = point['gps_lat'];
 		lng = point['gps_lng'];
+		//var date = opentransat.timeToDate(point['transmit_time']);
+		//var milis = date.getTime();
+		//W.setTimestamp(milis); 
 	}
 
 	return currentMarker.setLatLng([lat, lng]);

@@ -14,6 +14,7 @@
 <script type='text/javascript' src='js/leaflet_legend.js'></script>
 <script type='text/javascript' src='js/leaflet_zoom.js'></script>
 <script type='text/javascript' src='js/map.js'></script>
+<script async defer src="js/windyty.js"></script> 
 </head>
 
 <body>
@@ -30,9 +31,19 @@
 	<li id="button-refresh" title="Refresh data">&#x21bb;</li>
 </ul>
 </div>
-<div id="map"></div>
+<div id="windyty"></div>
 <script type="text/javascript">
-$(document).ready(initMap);
+
+var windytyInit = {
+        key: 'PsL-At-XpsPTZexBwUkO7Mx5I',
+        lat: 36, lon: -102, zoom: 5,
+      }
+
+function windytyMain(map) {
+	$(document).ready(function() {
+		initMain(map);
+	});
+}
 </script>
 </body>
 </html>

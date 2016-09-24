@@ -52,11 +52,14 @@ var opentransat = {
 		return Math.round(x*1000000)/1000000;
     },
 
+    timeToDate: function(time) {
+    	return new Date(time.replace(' ', 'T')+'+00:00');
+    },
+
     prepareLegend: function(data) {
 
     	var content = '<div class="content">';
 	  	var custom_arr = $.extend({}, this.custom_arr_default);
-	  	var time = data['transmit_time'].replace(' ', 'T');
 	  	var device = data['device'];
 	  	var custom_arr_val = data['custom'].split(';');
 	  	var gps_lat = parseFloat(data['gps_lat']);
@@ -68,7 +71,7 @@ var opentransat = {
 	  		network = 'Globarstar (secondary)';
 	  	}
 
-		var date_gmt = new Date(time+'+00:00');
+		var date_gmt = this.timeToDate(data['transmit_time']);
 		var agostr = opentransat.timeSince(date_gmt);
 
 		var travelTimeStr = opentransat.secToTime(data['travel-time']);
