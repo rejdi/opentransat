@@ -51,7 +51,7 @@ function initMap() {
     		maxZoom: 20,
     		subdomains:['mt0','mt1','mt2','mt3']
 			}),
-		clouds = L.tileLayer('http://{s}.tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png',{
+		precipitation = L.tileLayer('http://{s}.tile.openweathermap.org/map/precipitation/{z}/{x}/{y}.png',{
     		maxZoom: 19,
     		opacity: 0.5,
     		attribution: weatherAtt
@@ -74,7 +74,7 @@ function initMap() {
 
 	var overlays = {
 		'Comments': commentsLayer,
-		'Clouds': clouds,
+		'Precipitation': precipitation,
 		'Rain': rain
 	};
 
@@ -105,7 +105,7 @@ function initMap() {
 	setInterval(handleTimer, 1000);
 
 	button_refresh.click(function() {
-		if (refresh_sec <= 0) return;	//refreshing
+		if (refresh_sec <= 0) return;	//loading
 		updateData();
 	});
 
@@ -145,19 +145,19 @@ function handleTimer() {
 	} else if (refresh_sec > 0) {
 		button_refresh.html('&#x21bb; ' + opentransat.secToTime(refresh_sec));
 	} else {
-		button_refresh.html('&#x21bb; Refreshing');
+		button_refresh.html('&#x21bb; Loading');
 	}
 }
 
 
 function updateData() {
 	button_refresh.css('color','grey');
-	button_refresh.html('&#x21bb; Refreshing');
+	button_refresh.html('&#x21bb; Loading');
 	refresh_sec = -1;
-	$.getJSON('data.json', {}, function(data) {
+	$.getJSON('data.json').done(function(data) {
 		refresh_sec = update_interval_sec;
 		button_refresh.css('color','black');
-		button_refresh.html('&#x21bb; ' + opentransat.secToTime(update_interval_sec));
+		button_refresh.html('&#x21bb; ' + opentransat.secToTime(refresh_sec));
 
 		var len = Object.size(data) - (data['comments'] ? 1 : 0),
 			diff = len - markers.length;
@@ -222,6 +222,11 @@ function updateData() {
 			currentBounds.extend(polyLines.slice(-diff));
 			map.fitBounds(currentBounds);
 		}
+	})
+	.fail(function(jqxhr, textStatus, error) {
+		refresh_sec = update_interval_sec < 60 ? update_interval_sec : 60;
+		button_refresh.css('color','red');
+		button_refresh.html('&#x21bb; ' + opentransat.secToTime(refresh_sec));
 	});
 }
 
