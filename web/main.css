@@ -106,4 +106,5 @@ html, body {
 .leaflet-control-zoom a.leaflet-control-zoom-fit, .leaflet-control-zoom a.leaflet-control-zoom-last {
 	height: 80px;
 	line-height: 80px;
+	overflow: hidden;
 }
