@@ -38,7 +38,7 @@ function getSpeed($pos1, $pos2) {
 	return $d/$dt;
 }
 
-$data = file_get_contents("http://track.opentransat.com/data.php?pathid=0&_=1473926642087");
+$data = @file_get_contents("http://track.opentransat.com/data.php?pathid=0&_=1473926642087");
 $json = json_decode($data,true);
 if ($json === null) {
 	//neplatne data

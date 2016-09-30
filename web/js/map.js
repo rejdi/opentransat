@@ -1,188 +1,158 @@
+var map = {
+	map: null,
+	legend: null,
 
-var update_interval_sec = 900; //every 15 min
-var refresh_sec = 1;
-var notifySound = new Audio('tada.webm');
-notifySound.disabled = false;
-var music = new Audio('music.webm');
+	commentsLayer: null,
+	linesLayer:	null,
+	lines: null,
+	markersLayer: null,
+	currentMarker: null,
 
-var lines;		//single layer for all lines
-var markers;	//each act as a layer
-var comments;
-var dataLayer;
-var commentsLayer;
-var map;
-var currentMarker;
-var legend;
-var button_refresh;
+	markers: [],
+	comments: [],
 
-$.ajaxSetup({
-	type: "GET",
-	headers: {"If-Modified-Since": "Sat, 1 Jan 2005 00:00:00 GMT"},
-	cache: false, //adds timestamp
-	timeout: 30000
-});
+	weatherAtt: 'Map data © <a href="http://openweathermap.org/">OpenWeatherMap</a>',
 
-function initMap() {
-	button_refresh = $('#button-refresh');
-
-	map = L.map('map', {unloadInvisibleTiles: true, reuseTiles: true, updateWhenIdle: true, zoomControl: false});
-
-	var	weatherAtt = 'Map data © <a href="http://openweathermap.org/">OpenWeatherMap</a>',
-		oceanBaseMap = L.tileLayer(
+	sources: {
+		oceanBaseMap: L.tileLayer(
 			'http://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}',
-			{id: 'map.ocean',
-			maxZoom: 10,
-			attribution: 'Tiles &copy; Esri - Sources &mdash; GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri'}),
-		nationalGeo = L.tileLayer(
+			{
+				id: 'map.ocean',
+				maxZoom: 10,
+				attribution: 'Tiles &copy; Esri - Sources &mdash; GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri'
+			}),
+		nationalGeo: L.tileLayer(
 			'http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',
-			{id: 'map.natgeo',
-			maxZoom: 10,
-			attribution: 'Tiles &copy; Esri - Sources &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC'}),
-		osmBase = L.tileLayer(
+			{
+				id: 'map.natgeo',
+				maxZoom: 10,
+				attribution: 'Tiles &copy; Esri - Sources &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC'
+			}),
+		osmBase: L.tileLayer(
 			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-			{id: 'map.osm',
-			attribution: 'Map data © <a href="http://openstreetmap.org/">OpenStreetMap</a> contributors, CC-BY-SA'
+			{
+				id: 'map.osm',
+				attribution: 'Map data © <a href="http://openstreetmap.org/">OpenStreetMap</a> contributors, CC-BY-SA'
 			}),
-		googleSatelite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-    			maxZoom: 20,
-    			subdomains:['mt0','mt1','mt2','mt3']
+		googleSatelite: L.tileLayer(
+			'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+			{
+				maxZoom: 20,
+				subdomains:['mt0','mt1','mt2','mt3']
 			}),
-		googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
-    		maxZoom: 20,
-    		subdomains:['mt0','mt1','mt2','mt3']
+		googleTerrain: L.tileLayer(
+			'http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+			{
+				maxZoom: 20,
+				subdomains:['mt0','mt1','mt2','mt3']
 			}),
-		precipitation = L.tileLayer('http://{s}.tile.openweathermap.org/map/precipitation/{z}/{x}/{y}.png',{
-    		maxZoom: 19,
-    		opacity: 0.5,
-    		attribution: weatherAtt
+		precipitation: L.tileLayer(
+			'http://{s}.tile.openweathermap.org/map/precipitation/{z}/{x}/{y}.png',
+			{
+				maxZoom: 19,
+				opacity: 0.5,
+				attribution: this.weatherAtt
 			}),
-		rain = L.tileLayer('http://{s}.tile.openweathermap.org/map/rain/{z}/{x}/{y}.png',{
-    		maxZoom: 19,
-    		opacity: 0.5,
-    		attribution: weatherAtt
-			});
+		rain: L.tileLayer(
+			'http://{s}.tile.openweathermap.org/map/rain/{z}/{x}/{y}.png',
+			{
+				maxZoom: 19,
+				opacity: 0.5,
+				attribution: this.weatherAtt
+			})
+	},
 
-	commentsLayer = L.layerGroup([]).addTo(map);
+	state: {
+		eventbus: null,
+		data: null,
+		selected_marker_index: null,
+		selected_comment_index: null
+	},
 
-	var baseLayers = {
-		'Ocean map': oceanBaseMap,
-		'National Geographics': nationalGeo,
-		'OSM Mapnik': osmBase,
-		'Google Satelite': googleSatelite,
-		'Google Terrain': googleTerrain
-	};
+	init_map: function(eventbus) {
+		this.state.eventbus = eventbus;
 
-	var overlays = {
-		'Comments': commentsLayer,
-		'Precipitation': precipitation,
-		'Rain': rain
-	};
+		this.lines = L.polyline([], {color: 'red', clickable: false});
+		this.map = L.map('map', {unloadInvisibleTiles: true, reuseTiles: true, updateWhenIdle: true, zoomControl: false});
+		this.commentsLayer = L.layerGroup([]);
+		this.linesLayer = L.layerGroup([this.lines]);
+		this.markersLayer = L.layerGroup([]);
 
+		var baseLayers = {
+			'Ocean map': this.sources.oceanBaseMap,
+			'National Geographics': this.sources.nationalGeo,
+			'OSM Mapnik': this.sources.osmBase,
+			'Google Satelite': this.sources.googleSatelite,
+			'Google Terrain': this.sources.googleTerrain
+		};
 
-	//add toggle
-	L.control.layers(baseLayers, overlays).addTo(map);
-	//add default layer
-	map.addLayer(osmBase);
+		var overlays = {
+			'Comments': this.commentsLayer,
+			'Markers': this.markersLayer,
+			'Precipitation': this.sources.precipitation,
+			'Rain': this.sources.rain
+		};
 
-	lines = L.polyline([], {color: 'red', clickable: false});
-	markers = [];
-	comments = [];
-	dataLayer = L.layerGroup([lines]).addTo(map);
+		//layer toggle control
+		L.control.layers(baseLayers, overlays).addTo(this.map);
+		//map scale control
+		L.control.scale().addTo(this.map);
+		//map legend
+		/*this.legend = new L.Control.Legend();
+		this.map.addControl(this.legend);*/
+		//zoom control
+		this.map.addControl(new L.Control.ZoomExtra({
+			latlng: this.lines
+		}));
 
-	L.control.scale().addTo(map);
+		//default layer
+		this.map.addLayer(this.sources.osmBase);
+		this.map.addLayer(this.linesLayer);
+		this.map.addLayer(this.markersLayer);
+		this.map.addLayer(this.commentsLayer);
 
-	map.fitWorld();
-	currentMarker = L.circleMarker([]);
-	
-	//var buttons = L.control()
-	//buttony
-	legend = new L.Control.Legend();
-	map.addControl(legend);
-	map.addControl(new L.Control.ZoomExtra({
-		latlng: lines
-	}));
+		this.map.fitWorld();
+		this.currentMarker = L.circleMarker([]);
 
-	setInterval(handleTimer, 1000);
+		var map = this;
 
-	button_refresh.click(function() {
-		if (refresh_sec <= 0) return;	//loading
-		updateData();
-	});
+		//musime podchytit zmenu velkosti mapy (hoci by to asi chcelo iny event)
+		eventbus.on(opentransat.events.hide_side_pane, function(event) {
+			setTimeout(function() { map.map.invalidateSize(true); }, 500);
+		});
 
-	music.loop = 1;
-	$('#button-toggle-music').click(function() {
-		if (music.paused) {
-			music.play();
-			$(this).css('color', 'black');
-		} else {
-			music.pause();
-			$(this).css('color', 'grey');
-		}
-	});
+		eventbus.on(opentransat.events.show_side_pane, function(event) {
+			setTimeout(function() { map.map.invalidateSize(true); }, 500);
+		});
 
-	$('#button-toggle-notify').click(function() {
-		notifySound.disabled = !notifySound.disabled;
-		if (notifySound.disabled) {
-			$(this).css('color', 'grey');
-		} else {
-			$(this).css('color', 'black');
-		}
-	});
+		eventbus.on(opentransat.events.new_data, map.update_data.bind(this));
 
-	loadSettings();
-}
+		eventbus.on(opentransat.events.on_comment_selected, map.select_comment.bind(this));
 
-function loadSettings() {
-	//sem nacitat nastavenia - stav notifikacii, hudby...
-	music.play();
-}
+		eventbus.on(opentransat.events.on_marker_selected, map.select_marker.bind(this));
+	},
 
+	update_data: function (event, data) {
+		if (data === this.state.data) return; //old data, reload ended
+		this.state.data = data;
+		var diff = Object.keys(data).length - this.markers.length - (data['comments'] ? 1 : 0),
+			len = this.markers.length;
 
-function handleTimer() {
-	refresh_sec--;
-	if (refresh_sec == 0) {
-		updateData();
-	} else if (refresh_sec > 0) {
-		button_refresh.html('&#x21bb; ' + opentransat.secToTime(refresh_sec));
-	} else {
-		button_refresh.html('&#x21bb; Loading');
-	}
-}
+		this.markersLayer.clearLayers();
+		this.commentsLayer.clearLayers();
+		var lines = [];
 
-
-function updateData() {
-	button_refresh.css('color','grey');
-	button_refresh.html('&#x21bb; Loading');
-	refresh_sec = -1;
-	$.getJSON('data.json').done(function(data) {
-		refresh_sec = update_interval_sec;
-		button_refresh.css('color','black');
-		button_refresh.html('&#x21bb; ' + opentransat.secToTime(refresh_sec));
-
-		var len = Object.size(data) - (data['comments'] ? 1 : 0),
-			diff = len - markers.length;
-
-		//we have new data - make some noise(!)
-		if (diff > 0 && !notifySound.disabled) {
-			notifySound.play();
-		}
-
-		dataLayer.clearLayers();
-		dataLayer.addLayer(lines);
-		commentsLayer.clearLayers();
-
-		markers.forEach(function(item) {
+		this.markers.forEach(function(item) {
 			item.clearAllEventListeners();
 		});
 
-		comments.forEach(function(item) {
+		this.comments.forEach(function(item) {
 			item.clearAllEventListeners();
 		});
 
-		markers = [];
-		comments = [];
+		this.markers = [];
+		this.comments = [];
 
-		var polyLines = [];
 		var latlng;
 		var marker;
 		for (var i in data) {
@@ -192,116 +162,120 @@ function updateData() {
 			var p = data[i];
 
 			latlng = L.latLng(p['gps_lat'], p['gps_lng']);
-			polyLines.push(latlng);
+			lines.push(latlng);
 
-			marker = createMarker(p).addTo(dataLayer);
-			markers.push(marker);
+			marker = this.createMarker(p, i).addTo(this.markersLayer);
+			this.markers.push(marker);
 		}
 
 		if (data['comments']) {
+			var i = 0;
+			var that = this;
 			data['comments'].forEach(function(comment) {
-				var commentMarker = createCommentMarker(comment);
-				commentMarker.addTo(commentsLayer);
-				comments.push(commentMarker);
+				var commentMarker = that.createCommentMarker(comment, i);
+				commentMarker.addTo(that.commentsLayer);
+				that.comments.push(commentMarker);
+				i++;
 			});
 		}
 
-		lines.setLatLngs(polyLines);
+		this.lines.setLatLngs(lines);
+		this.currentMarker.setLatLng(lines[lines.length-1]);
 
-		if (diff > 0) {
-			setCurrentMarker(markers[markers.length-1].my_data, 'mark');
-		}
-		currentMarker.addTo(dataLayer).bringToBack();
-		lines.bringToBack();
-
-		if (diff == len) {
+		if (diff > 0 && len === 0) {
 			//initial zoom
-			map.fitBounds(polyLines);
+			this.map.fitBounds(lines);
+
+			this.currentMarker.addTo(this.linesLayer).bringToBack();
+			this.lines.bringToBack();
 		} else if (diff > 0) {
-			var currentBounds = map.getBounds();
-			currentBounds.extend(polyLines.slice(-diff));
-			map.fitBounds(currentBounds);
+			var currentBounds = this.map.getBounds();
+			currentBounds.extend(lines.slice(-diff));
+			this.map.fitBounds(currentBounds);
 		}
-	})
-	.fail(function(jqxhr, textStatus, error) {
-		refresh_sec = update_interval_sec < 60 ? update_interval_sec : 60;
-		button_refresh.css('color','red');
-		button_refresh.html('&#x21bb; ' + opentransat.secToTime(refresh_sec));
-	});
-}
+	},
 
-function createMarker(item) {
-	if (item['custom'] === undefined) {
-		console.log(item);
-	}
-	var custom = item['custom'].split(';');
-	var color = 'red';
-	if (item.device == 'iridium') {
-		color = '#00FF00';
-		if (custom[custom.length-1] == 'i') {
-			color = '#008000';
+	createMarker: function (item, index) {
+		var custom = item['custom'].split(';');
+		var color = 'red';
+		if (item.device == 'iridium') {
+			color = '#00FF00';
+			if (custom[custom.length-1] == 'i') {
+				color = '#008000';
+			}
 		}
+
+		if (item.device == 'spot2') {
+			color = '#FF0000';
+		}
+
+		if (item.device == 'spot3') {
+			color = '#FFFF00';
+		}
+
+		var marker = L.circleMarker([item['gps_lat'], item['gps_lng']], {
+			color: color,
+			radius: 0,
+			stroke: true,
+			fill: true,
+			opacity: 1,
+			weight: 10
+		});
+		marker.my_data = index;
+		marker.on('mouseover', this.handleMouseMarker.bind(this));
+		marker.on('click', this.handleMouseMarker.bind(this));
+
+		return marker;
+	},
+
+	createCommentMarker: function createCommentMarker(item, index) {
+		var commentMarker =	L.marker([item[0], item[1]]);
+		commentMarker.my_data = index;
+		commentMarker.on('mouseover', this.handleMouseComment.bind(this));
+		commentMarker.on('click', this.handleMouseComment.bind(this));
+
+		return commentMarker;
+	},
+
+	handleMouseMarker: function(event) {
+		this.state.eventbus.trigger(opentransat.events.on_marker_selected, event.target.my_data);
+	},
+
+	handleMouseComment: function(event) {
+		this.state.eventbus.trigger(opentransat.events.on_comment_selected, event.target.my_data);
+	},
+
+	select_marker: function (event, index) {
+		if (index == this.state.selected_marker_index) {
+			return;
+		}
+		this.state.selected_marker_index = index;
+
+		var point = this.state.data[index];
+		//this.legend.setText(opentransat.prepareLegend(point));
+		var lat = parseFloat(point['gps_lat']),
+			lng = parseFloat(point['gps_lng']);
+
+		if (!this.map.getBounds().contains([lat, lng])) {
+			this.map.panTo([lat, lng], {animate: true});
+		}
+
+		return this.currentMarker.setLatLng([lat, lng]);
+	},
+
+	select_comment: function (event, index) {
+		if (index == this.state.selected_comment_index) {
+			return;
+		}
+		this.state.selected_comment_index = index;
+
+		var comment = this.state.data['comments'][index];
+		//this.legend.setText(opentransat.prepareComment(comment));
+
+		if (!this.map.getBounds().contains([comment[0], comment[1]])) {
+			this.map.panTo([comment[0], comment[1]], {animate: true});
+		}
+
+		return this.currentMarker.setLatLng([comment[0], comment[1]]);
 	}
-
-	if (item.device == 'spot2') {
-		color = '#FF0000';
-	}
-
-	if (item.device == 'spot3') {
-		color = '#FFFF00';
-	}
-
-	var marker = L.circleMarker([item['gps_lat'], item['gps_lng']], {
-		color: color,
-		radius: 0,
-		stroke: true,
-		fill: true,
-		opacity: 1,
-		weight: 10
-	});
-	marker.my_data = item;
-	marker.type = 'mark';
-	marker.on('mouseover', handleMouse);
-	marker.on('click', handleMouse);
-	//chytat eventy
-	return marker;
-}
-
-function createCommentMarker(item) {
-	var commentMarker =	L.marker([item[0], item[1]]);
-	commentMarker.my_data = item;
-	commentMarker.type = 'comment';
-	commentMarker.on('mouseover', handleMouse);
-	commentMarker.on('click', handleMouse);
-	
-	return commentMarker;
-}
-
-function handleMouse(item) {
-	setCurrentMarker(item.target.my_data, item.target.type);
-}
-
-function setCurrentMarker(point, type) {
-	var lat, lng;
-	if (type == 'comment') {
-		legend.setText(opentransat.prepareComment(point));
-		lat = point[0];
-		lng = point[1];
-	}
-
-	if (type == 'mark') {
-		legend.setText(opentransat.prepareLegend(point));
-		lat = point['gps_lat'];
-		lng = point['gps_lng'];
-	}
-
-	return currentMarker.setLatLng([lat, lng]);
-}
-
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
 };

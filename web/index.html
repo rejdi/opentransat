@@ -14,25 +14,37 @@
 <script type='text/javascript' src='js/leaflet_legend.js'></script>
 <script type='text/javascript' src='js/leaflet_zoom.js'></script>
 <script type='text/javascript' src='js/map.js'></script>
+<script type='text/javascript' src='js/toolbar.js'></script>
+<script type='text/javascript' src='js/side_bar.js'></script>
+<script type='text/javascript' src='js/main.js'></script>
 </head>
 
 <body>
 <div id="mainPanel">
 <div id="logo"></div>
-<ul id="tabs">
+<!--<ul class="tabs">
 	<li id="menu-map">Map</li>
 	<li id="menu-stats">Stats</li>
-	<li id="menu-about">About</li>
-</ul>
+</ul>//-->
 <ul id="action-buttons">
-	<li id="button-toggle-music" title="Toggle background music">&#x266B;</li>
-	<li id="button-toggle-notify" title="Toggle notifications">&#x26a0;</li>
+	<li id="button-toggle-music" class="active" title="Toggle background music">&#x266B;</li>
+	<li id="button-toggle-notify" class="active" title="Toggle notifications">&#x26a0;</li>
 	<li id="button-refresh" title="Refresh data">&#x21bb;</li>
+	<li id="button-toggle-side" class="active" title="Toggle side panel">&#x2630;</li>
 </ul>
 </div>
-<div id="map"></div>
+<div id="map" class="expanded"></div>
+<div id="rightPanel">
+	<ul class="tabs">
+		<li id="tab-markers" class="selected">Markers</li>
+		<li id="tab-comments">Comments</li>
+	</ul>
+	<div class="markers"></div>
+	<div class="comments hidden"></div>
+</div>
 <script type="text/javascript">
-$(document).ready(initMap);
+$(document).ready(app.initMain());
 </script>
 </body>
 </html>
+

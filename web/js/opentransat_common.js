@@ -1,4 +1,14 @@
 var opentransat = {
+	events: {
+		hide_side_pane: "hide_side_pane",
+		show_side_pane: "show_side_pane",
+		reload_data: "reload_data",
+		new_data: "new_data",
+		new_data_error: "new_data_error",
+		on_marker_selected: "on_marker_selected",
+		on_comment_selected: "on_comment_selected",
+	},
+
 	custom_arr_default: [
 		{'title':'Compass', 'val':0, 'factor':1, 'sym': '&deg;'},
 		{'title':'Battery Voltage', 'val':0, 'factor':0.1, 'sym': ' V'},
@@ -136,5 +146,39 @@ var opentransat = {
     	content += '<div>' + comment[3] + '</div>';
     	content += '</div>';
 	  	return content;
-    }
+    },
+
+    prepareLegendHeader: function(data) {
+    	var css = 'green';
+    	if (data['device'] == 'spot2') {
+    		css = 'red';
+    	} else if (data['device'] == 'spot3') {
+			css = 'yellow';
+    	}
+    	var content = '<div><span class="dot ' + css + '"></span><strong>' + data['transmit_time'] + '</strong></div>';
+    	return content;
+    },
+
+    deepEqual: function (x, y) {
+	  if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null)) {
+	    if (Object.keys(x).length != Object.keys(y).length)
+	      return false;
+
+	    for (var prop in x) {
+	      if (y.hasOwnProperty(prop))
+	      {  
+	        if (!this.deepEqual(x[prop], y[prop]))
+	          return false;
+	      }
+	      else
+	        return false;
+	    }
+
+	    return true;
+	  }
+	  else if (x !== y)
+	    return false;
+	  else
+	    return true;
+	}
 };

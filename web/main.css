@@ -3,6 +3,9 @@ html, body {
 	padding: 0;
 	height: 100%;
 	width: 100%;
+	overflow: hidden;
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 1.0em;
 }
 
 #map {
@@ -10,6 +13,12 @@ html, body {
 	top: 30px;
 	bottom: 0;
 	left: 0;
+	right: 300px;
+	transition: right 0.5s ease;
+	z-index: 0;
+}
+
+#map.expanded {
 	right: 0;
 }
 
@@ -18,24 +27,6 @@ html, body {
 	padding: 0;
 	width: 100%;
 	height: 30px;
-	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
-	font-size: 1.0em;
-}
-
-#mainPanel ul {
-	padding: 0;
-	margin: 0;
-	display: inline-block;
-}
-
-#tabs li {
-	display: inline-block;
-	border: 1px solid black;
-	padding: 5px;
-	border-bottom: none;
-	height: 19px;
-	line-height: 19px;
-	border-radius: 5px 5px 0 0;
 }
 
 #mainPanel ul#action-buttons {
@@ -58,6 +49,27 @@ html, body {
 	line-height: 20px;
 	padding-left: 3px;
 	padding-right: 3px;
+	transition: text-shadow ease 0.5s, color ease 0.5s;
+	color: grey;
+}
+
+#action-buttons li.active {
+	text-shadow: 0 0 0.5em rgb(41, 116, 255);
+	color: black;
+}
+
+#action-buttons li#button-refresh {
+	color: black;
+}
+
+#action-buttons li#button-refresh.active {
+	color: grey;
+	text-shadow: none;
+}
+
+#action-buttons li.error {
+	text-shadow: 0 0 0.5em red;
+	color: black;
 }
 
 .map-legend {
@@ -107,4 +119,132 @@ html, body {
 	height: 80px;
 	line-height: 80px;
 	overflow: hidden;
+}
+
+#rightPanel {
+	position: absolute;
+	top: 30px;
+	right: 0;
+	bottom: 0;
+	width: 300px;
+	max-width: 100%;
+	transition: right 0.5s ease;
+	z-index: 100;
+	background-color: white;
+	opacity: 0.9;
+	font-size: 0.9em;
+}
+
+#rightPanel.collapsed {
+	right: -300px;
+	overflow: hidden;
+}
+
+.tabs, #action-buttons {
+	padding: 0;
+	margin: 0;
+	display: inline-block;
+}
+
+.tabs {
+	overflow: hidden;
+	padding: 5px 5px 0 5px;
+	width: 100%;
+	position: absolute;
+	z-index: 2;
+}
+
+.tabs li {
+	display: inline-block;
+	padding: 5px;
+	height: 19px;
+	border: 1px solid transparent;
+	border-bottom: 1px solid lightgrey;
+	line-height: 19px;
+	transition: background-color ease 0.5s, border ease-out 0.5s, color ease 0.5s;
+	box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+	color: grey;
+}
+
+.tabs li:hover {
+	background-color: #ddd;
+	cursor: pointer;
+	color: black;
+}
+
+.tabs li.selected {
+	border: 1px solid lightgrey;
+	border-bottom: 1px solid white;
+	color: black;
+}
+
+#rightPanel .markers, #rightPanel .comments {
+	position: absolute;
+	top: 35px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: white;
+	overflow: auto;
+	z-index: 1;
+	border-top: 1px solid lightgrey;
+	transition: visibility ease 0.5s, opacity ease 0.5s;
+	opacity: 1;
+}
+
+#rightPanel .comments.hidden, #rightPanel .markers.hidden {
+	visibility: hidden;
+	opacity: 0;
+}
+
+#rightPanel .comments img {
+	max-width: 100%;
+	margin: 5px 0;
+}
+
+#rightPanel .comments .comment,
+#rightPanel .markers .marker {
+	margin: 5px;
+	padding: 5px;
+	box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+	text-align: justify;
+	transition: background-color 0.5s ease;
+}
+
+#rightPanel .comment:hover,
+#rightPanel .marker:hover {
+	background-color: rgba(51, 136, 255, 0.2);
+}
+
+#rightPanel .comment.selected,
+#rightPanel .marker.selected {
+	background-color: rgba(51, 136, 255, 0.5);
+}
+
+#rightPanel .marker .content {
+	display: none;
+}
+
+.dot {
+	display: inline-block;
+	margin: 0 5px;
+	padding: 0;
+	border: 5px solid black;
+	border-radius: 50%;
+}
+
+.dot.red {
+	border-color: red;
+}
+
+.dot.yellow {
+	border-color: yellow;
+}
+
+.dot.green {
+	border-color: #0F0;
+}
+
+#rightPanel .marker.selected .content {
+	display: block;
 }
