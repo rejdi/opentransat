@@ -19,7 +19,6 @@ var toolbar = {
 	init_toolbar: function(eventbus) {
 		this.state.eventbus =  eventbus;
 		this.music.loop = 1;
-		this.music.play();
 
 		var toolbar = this;
 
@@ -33,22 +32,17 @@ var toolbar = {
 		this.button_toggle_music.click(function() {
 			toolbar.state.background_music = !toolbar.state.background_music;
 			if (toolbar.state.background_music) {
-				toolbar.music.pause();
-				toolbar.button_toggle_music.toggleClass('active', false);
-			} else {
 				toolbar.music.play();
-				toolbar.button_toggle_music.toggleClass('active', true);
+			} else {
+				toolbar.music.pause();
 			}
+			toolbar.button_toggle_music.toggleClass('active', toolbar.state.background_music);
 		});
 
 		this.button_toggle_notify = $('#button-toggle-notify');
 		this.button_toggle_notify.click(function() {
 			toolbar.state.notify_sound = !toolbar.state.notify_sound;
-			if (toolbar.state.notify_sound) {
-				toolbar.button_toggle_notify.toggleClass('active', true);
-			} else {
-				toolbar.button_toggle_notify.toggleClass('active', false);
-			}
+			toolbar.button_toggle_notify.toggleClass('active', toolbar.state.notify_sound);
 		});
 
 		this.button_toggle_side = $('#button-toggle-side');
@@ -80,10 +74,12 @@ var toolbar = {
 			toolbar.button_refresh.toggleClass('active', false).toggleClass('error', false);
 			toolbar.state.refresh_sec = toolbar.update_interval_sec;
 			if (toolbar.state.data === data) return;	//no update
-			toolbar.state.data = data;
-			if (toolbar.state.notify_sound) {
+			//initial sound will be skipped
+			if (toolbar.state.notify_sound && toolbar.state.data != null) {
 				toolbar.notify_sound.play();
 			}
+
+			toolbar.state.data = data;
 		});
 
 		this.state.eventbus.on(opentransat.events.new_data_error, function(event) {
