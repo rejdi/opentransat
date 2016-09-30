@@ -1,5 +1,6 @@
 var map = {
 	map: null,
+    map_element: null,
 	legend: null,
 
 	commentsLayer: null,
@@ -71,6 +72,7 @@ var map = {
 
 	init_map: function(eventbus) {
 		this.state.eventbus = eventbus;
+		this.map_element = $('#map');
 
 		this.lines = L.polyline([], {color: 'red', clickable: false});
 		this.map = L.map('map', {unloadInvisibleTiles: true, reuseTiles: true, updateWhenIdle: true, zoomControl: false});
@@ -118,10 +120,12 @@ var map = {
 
 		//musime podchytit zmenu velkosti mapy (hoci by to asi chcelo iny event)
 		eventbus.on(opentransat.events.hide_side_pane, function(event) {
+		    map.map_element.toggleClass('expanded', true);
 			setTimeout(function() { map.map.invalidateSize(true); }, 500);
 		});
 
 		eventbus.on(opentransat.events.show_side_pane, function(event) {
+            map.map_element.toggleClass('expanded', false);
 			setTimeout(function() { map.map.invalidateSize(true); }, 500);
 		});
 
@@ -238,10 +242,16 @@ var map = {
 	},
 
 	handleMouseMarker: function(event) {
+        if (window.innerWidth < 600) {
+            side_bar.state.eventbus.trigger(opentransat.events.show_side_pane);
+        }
 		this.state.eventbus.trigger(opentransat.events.on_marker_selected, event.target.my_data);
 	},
 
 	handleMouseComment: function(event) {
+        if (window.innerWidth < 600) {
+            side_bar.state.eventbus.trigger(opentransat.events.show_side_pane);
+        }
 		this.state.eventbus.trigger(opentransat.events.on_comment_selected, event.target.my_data);
 	},
 

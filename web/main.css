@@ -131,7 +131,7 @@ html, body {
 	transition: right 0.5s ease;
 	z-index: 100;
 	background-color: white;
-	opacity: 0.9;
+	opacity: 1;
 	font-size: 0.9em;
 }
 
@@ -247,4 +247,16 @@ html, body {
 
 #rightPanel .marker.selected .content {
 	display: block;
+}
+
+@media screen
+and (max-device-width: 599px) {
+
+    #rightPanel {
+        opacity: 0.9;
+    }
+
+    #map {
+        right: 0;
+    }
 }

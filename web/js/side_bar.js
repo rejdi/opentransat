@@ -21,6 +21,17 @@ var side_bar = {
 		this.button_comments.toggleClass('selected', screen === 'comments');
 	},
 
+    is_element_visible: function(element, relativeTo) {
+        var pos = element.position();
+
+        return (
+            pos.top >= relativeTo.scrollTop() &&
+            pos.left >= relativeTo.scrollLeft() &&
+            pos.top + element.outerHeight(true) <= relativeTo.scrollTop() + relativeTo.innerHeight() &&
+            pos.left + element.outerWidth(true) <= relativeTo.scrollLeft() + relativeTo.innerWidth()
+        );
+    },
+
 	init_sidebar: function(eventbus) {
 		this.state.eventbus =  eventbus;
 		this.button_markers = $('#tab-markers');
@@ -32,29 +43,36 @@ var side_bar = {
 		var side_bar = this;
 
 		this.button_comments.click(function() {
-			side_bar.state.screen = 'comments'
 			side_bar.switch_screen('comments');
 		});
 
 		this.button_markers.click(function() {
-			side_bar.state.screen = 'markers'
 			side_bar.switch_screen('markers');
 		});
 
 		this.comment_panel.on('click', '.comment', function(event) {
-			side_bar.state.eventbus.trigger(opentransat.events.on_comment_selected, $(this).index());
+            if (window.innerWidth < 600) {
+                side_bar.state.eventbus.trigger(opentransat.events.hide_side_pane);
+            }
+            side_bar.state.eventbus.trigger(opentransat.events.on_comment_selected, $(this).index());
 		});
 
 		this.marker_panel.on('click', '.marker', function(event, index) {
-			side_bar.state.eventbus.trigger(opentransat.events.on_marker_selected, $(this).attr('target'));
+			//ak sme na mobile a klikame druhy krat na bod, skryjeme panel
+            if (window.innerWidth < 600 && $(this).hasClass('selected')) {
+                side_bar.state.eventbus.trigger(opentransat.events.hide_side_pane);
+            }
+            side_bar.state.eventbus.trigger(opentransat.events.on_marker_selected, $(this).attr('target'));
 		});
 
 		this.state.eventbus.on(opentransat.events.on_marker_selected, function (event, index) {
+            side_bar.switch_screen('markers');
 			side_bar.select_marker.bind(side_bar);
 			side_bar.select_marker(index);
 		});
 
 		this.state.eventbus.on(opentransat.events.on_comment_selected, function (event, index) {
+		    side_bar.switch_screen('comments');
 			side_bar.select_comment.bind(side_bar);
 			side_bar.select_comment(index);
 		});
@@ -101,7 +119,13 @@ var side_bar = {
 			'<div class="content">' +
 			opentransat.prepareLegend(p) +
 			'</div>';
-		this.marker_panel.children('[target="' + index + '"]').toggleClass('selected', true).html(html);
+
+		var element = this.marker_panel.children('[target="' + index + '"]').toggleClass('selected', true).html(html);
+		if (!this.is_element_visible(element, this.marker_panel)) {
+            this.marker_panel.stop(true).animate({
+                scrollTop: element.position().top
+            }, 500);
+        }
 	},
 
 	select_comment: function(index) {
@@ -111,8 +135,14 @@ var side_bar = {
 		this.state.selected_comment_index = index;
 
 		this.comment_panel.children('.selected').toggleClass('selected', false);
-		this.comment_panel.children(':eq(' + index + ')').toggleClass('selected', true);
 		this.marker_panel.children('.selected').toggleClass('selected', false);
+        var element = this.comment_panel.children(':eq(' + index + ')').toggleClass('selected', true);
+
+        if (!this.is_element_visible(element, this.comment_panel)) {
+            this.comment_panel.stop(true).animate({
+                scrollTop: element.position().top
+            }, 500);
+        }
 	},
 
 	set_new_data: function(event, data) {
