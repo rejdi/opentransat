@@ -256,10 +256,11 @@ var map = {
 	},
 
 	select_marker: function (event, index) {
-		if (index == this.state.selected_marker_index) {
+		if (index === this.state.selected_marker_index) {
 			return;
 		}
 		this.state.selected_marker_index = index;
+		this.state.selected_comment_index = null;
 
 		var point = this.state.data[index];
 		//this.legend.setText(opentransat.prepareLegend(point));
@@ -274,10 +275,11 @@ var map = {
 	},
 
 	select_comment: function (event, index) {
-		if (index == this.state.selected_comment_index) {
+		if (index === this.state.selected_comment_index) {
 			return;
 		}
 		this.state.selected_comment_index = index;
+		this.state.selected_marker_index = null;
 
 		var comment = this.state.data['comments'][index];
 		//this.legend.setText(opentransat.prepareComment(comment));
