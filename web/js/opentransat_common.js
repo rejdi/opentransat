@@ -149,9 +149,13 @@ var opentransat = {
     },
 
     prepareLegendHeader: function(data) {
-    	var css = 'green';
-    	if (data['device'] == 'spot2') {
-    		css = 'red';
+    	var css = 'red';
+    	if (data['device'] == 'iridium') {
+    		var custom = data['custom'].split(';');
+    		css = 'green';
+    		if (custom[custom.length-1] == 'i') {
+				css = 'dark-green';
+			}
     	} else if (data['device'] == 'spot3') {
 			css = 'yellow';
     	}
