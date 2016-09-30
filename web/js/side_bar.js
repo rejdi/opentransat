@@ -69,12 +69,16 @@ var side_bar = {
             side_bar.switch_screen('markers');
 			side_bar.select_marker.bind(side_bar);
 			side_bar.select_marker(index);
+			side_bar.select_comment.bind(side_bar);
+			side_bar.select_comment(null);
 		});
 
 		this.state.eventbus.on(opentransat.events.on_comment_selected, function (event, index) {
 		    side_bar.switch_screen('comments');
 			side_bar.select_comment.bind(side_bar);
 			side_bar.select_comment(index);
+			side_bar.select_marker.bind(side_bar);
+			side_bar.select_marker(null);
 		});
 
 		this.state.eventbus.on(opentransat.events.hide_side_pane, this.hide_side_pane.bind(this));
@@ -93,12 +97,11 @@ var side_bar = {
 	},
 
 	select_marker: function(index) {
-		if (index == this.state.selected_marker_index) {
+		if (index === this.state.selected_marker_index) {
 			return;
 		}
 		this.state.selected_marker_index = index;
 
-		this.comment_panel.children('.selected').toggleClass('selected', false);
 		var that = this;
 		//use less memory by setting less content
 		this.marker_panel.children('.selected')
@@ -112,37 +115,41 @@ var side_bar = {
 				e.html(html);
 			})
 			.toggleClass('selected', false);
-		var p = this.state.data[index];
-		var html = '<div class="header">' +
-			opentransat.prepareLegendHeader(p) +
-			'</div>' +
-			'<div class="content">' +
-			opentransat.prepareLegend(p) +
-			'</div>';
 
-		var element = this.marker_panel.children('[target="' + index + '"]').toggleClass('selected', true).html(html);
-		if (!this.is_element_visible(element, this.marker_panel)) {
-            this.marker_panel.stop(true).animate({
-                scrollTop: element.position().top
-            }, 500);
-        }
+		if (index !== null) {
+			var p = this.state.data[index];
+			var html = '<div class="header">' +
+				opentransat.prepareLegendHeader(p) +
+				'</div>' +
+				'<div class="content">' +
+				opentransat.prepareLegend(p) +
+				'</div>';
+
+			var element = this.marker_panel.children('[target="' + index + '"]').toggleClass('selected', true).html(html);
+			if (!this.is_element_visible(element, this.marker_panel)) {
+	            this.marker_panel.stop(true).animate({
+	                scrollTop: element.position().top
+	            }, 500);
+	        }
+		}
 	},
 
 	select_comment: function(index) {
-		if (index == this.state.selected_comment_index) {
+		if (index === this.state.selected_comment_index) {
 			return;
 		}
 		this.state.selected_comment_index = index;
 
 		this.comment_panel.children('.selected').toggleClass('selected', false);
-		this.marker_panel.children('.selected').toggleClass('selected', false);
-        var element = this.comment_panel.children(':eq(' + index + ')').toggleClass('selected', true);
+		if (index !== null) {
+	        var element = this.comment_panel.children(':eq(' + index + ')').toggleClass('selected', true);
 
-        if (!this.is_element_visible(element, this.comment_panel)) {
-            this.comment_panel.stop(true).animate({
-                scrollTop: element.position().top
-            }, 500);
-        }
+	        if (!this.is_element_visible(element, this.comment_panel)) {
+	            this.comment_panel.stop(true).animate({
+	                scrollTop: element.position().top
+	            }, 500);
+	        }
+		}
 	},
 
 	set_new_data: function(event, data) {
