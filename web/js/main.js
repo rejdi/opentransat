@@ -1,5 +1,6 @@
 var app = {
 	eventBus: null,
+	loading: null,
 
 	state: {
 		data: null,
@@ -7,6 +8,8 @@ var app = {
 
 	initMain: function() {
 		//nacitanie nastaveni?
+
+		this.loading = $('.loading');
 
 		$.ajaxSetup({
 			type: "GET",
@@ -28,6 +31,7 @@ var app = {
 		$.getJSON('data.json').done(function(data) {
 			if (!opentransat.deepEqual(data, that.state.data)) {
 				that.eventBus.trigger(opentransat.events.new_data, data);
+				that.loading.toggleClass('hidden', true);
 
 				//on first data && large screen show side bar
 				if (that.state.data === null && window.innerWidth > 599) {
