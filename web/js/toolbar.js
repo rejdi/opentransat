@@ -55,13 +55,11 @@ var toolbar = {
 		});
 
 		this.state.eventbus.on(opentransat.events.hide_side_pane, function(event) {
-			toolbar.state.side_open = false;
-			toolbar.button_toggle_side.toggleClass('active', false);
+			toolbar.set_side_button(false);
 		});
 
 		this.state.eventbus.on(opentransat.events.show_side_pane, function(event) {
-			toolbar.state.side_open = true;
-			toolbar.button_toggle_side.toggleClass('active', true);
+			toolbar.set_side_button(true);
 		});
 
 		this.state.eventbus.on(opentransat.events.reload_data, function(event) {
@@ -88,6 +86,16 @@ var toolbar = {
 		});
 
 		setInterval(this.handleTimer.bind(this), 1000);
+
+		//initially hide side bar for small screen devices
+		if (window.innerWidth < 600) {
+			this.set_side_button(false);
+		}
+	},
+
+	set_side_button: function(state) {
+		toolbar.state.side_open = state;
+		toolbar.button_toggle_side.toggleClass('active', state);
 	},
 
 	handleTimer: function() {

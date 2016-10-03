@@ -86,6 +86,11 @@ var side_bar = {
 		this.state.eventbus.on(opentransat.events.show_side_pane, this.open_side_pane.bind(this));
 
 		this.state.eventbus.on(opentransat.events.new_data, this.set_new_data.bind(this));
+
+		//initially hide side bar for small screen devices
+		if (window.innerWidth < 600) {
+			this.hide_side_pane();
+		}
 	},
 
 	open_side_pane: function() {
