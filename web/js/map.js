@@ -121,12 +121,12 @@ var map = {
 		var map = this;
 
 		eventbus.on(opentransat.events.hide_side_pane, function(event) {
-			map.set_map_expand_state.bind(this);
+			map.set_map_expand_state.bind(map);
 			map.set_map_expand_state(true);
 		});
 
 		eventbus.on(opentransat.events.show_side_pane, function(event) {
-			map.set_map_expand_state.bind(this);
+			map.set_map_expand_state.bind(map);
 			map.set_map_expand_state(false);
 		});
 
@@ -144,7 +144,8 @@ var map = {
 
 	set_map_expand_state: function(state) {
 		this.map_element.toggleClass('expanded', state);
-		setTimeout(function() { this.map.invalidateSize(state); }, 500);
+		var map = this.map;
+		setTimeout(function() { map.invalidateSize(true); }, 500);
 	},
 
 	update_data: function (event, data) {
