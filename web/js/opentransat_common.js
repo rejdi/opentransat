@@ -159,7 +159,10 @@ var opentransat = {
     	} else if (data['device'] == 'spot3') {
 			css = 'yellow';
     	}
-    	var content = '<div><span class="dot ' + css + '"></span><strong>' + data['transmit_time'] + '</strong></div>';
+		var time = data['transmit_time'].replace(' ', 'T');
+		var date = new Date(time+'+00:00');
+
+    	var content = '<div><span class="dot ' + css + '"></span><strong>' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '</strong></div>';
     	return content;
     },
 

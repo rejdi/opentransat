@@ -2,6 +2,7 @@ var map = {
 	map: null,
     map_element: null,
 	legend: null,
+	loading: null,
 
 	commentsLayer: null,
 	linesLayer:	null,
@@ -73,6 +74,7 @@ var map = {
 	init_map: function(eventbus) {
 		this.state.eventbus = eventbus;
 		this.map_element = $('#map');
+		this.loading = $('#map .loading');
 
 		this.lines = L.polyline([], {color: 'red', clickable: false});
 		this.map = L.map('map', {unloadInvisibleTiles: true, reuseTiles: true, updateWhenIdle: true, zoomControl: false});
@@ -138,6 +140,7 @@ var map = {
 
 	update_data: function (event, data) {
 		if (data === this.state.data) return; //old data, reload ended
+		this.loading.toggleClass('hidden', true);
 		this.state.data = data;
 		var diff = Object.keys(data).length - this.markers.length - (data['comments'] ? 1 : 0),
 			len = this.markers.length;
