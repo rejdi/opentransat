@@ -120,15 +120,14 @@ var map = {
 
 		var map = this;
 
-		//musime podchytit zmenu velkosti mapy (hoci by to asi chcelo iny event)
 		eventbus.on(opentransat.events.hide_side_pane, function(event) {
-		    map.map_element.toggleClass('expanded', true);
-			setTimeout(function() { map.map.invalidateSize(true); }, 500);
+			map.set_map_expand_state.bind(this);
+			map.set_map_expand_state(true);
 		});
 
 		eventbus.on(opentransat.events.show_side_pane, function(event) {
-            map.map_element.toggleClass('expanded', false);
-			setTimeout(function() { map.map.invalidateSize(true); }, 500);
+			map.set_map_expand_state.bind(this);
+			map.set_map_expand_state(false);
 		});
 
 		eventbus.on(opentransat.events.new_data, map.update_data.bind(this));
@@ -136,6 +135,16 @@ var map = {
 		eventbus.on(opentransat.events.on_comment_selected, map.select_comment.bind(this));
 
 		eventbus.on(opentransat.events.on_marker_selected, map.select_marker.bind(this));
+
+		//initially hide side bar for small screen devices
+		if (window.innerWidth < 600) {
+			this.set_map_expand_state(true);
+		}
+	},
+
+	set_map_expand_state: function(state) {
+		this.map_element.toggleClass('expanded', state);
+		setTimeout(function() { this.map.invalidateSize(state); }, 500);
 	},
 
 	update_data: function (event, data) {
