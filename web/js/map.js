@@ -135,11 +135,6 @@ var map = {
 		eventbus.on(opentransat.events.on_comment_selected, map.select_comment.bind(this));
 
 		eventbus.on(opentransat.events.on_marker_selected, map.select_marker.bind(this));
-
-		//initially hide side bar for small screen devices
-		if (window.innerWidth < 600) {
-			this.set_map_expand_state(true);
-		}
 	},
 
 	set_map_expand_state: function(state) {

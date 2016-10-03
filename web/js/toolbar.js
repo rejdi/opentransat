@@ -12,7 +12,7 @@ var toolbar = {
 		notify_sound: true,
 		background_music: false,
 		eventbus: null,
-		side_open: true,
+		side_open: false,
 		data: null
 	},
 
@@ -86,11 +86,6 @@ var toolbar = {
 		});
 
 		setInterval(this.handleTimer.bind(this), 1000);
-
-		//initially hide side bar for small screen devices
-		if (window.innerWidth < 600) {
-			this.set_side_button(false);
-		}
 	},
 
 	set_side_button: function(state) {

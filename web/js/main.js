@@ -27,9 +27,17 @@ var app = {
 		var that = this;
 		$.getJSON('data.json').done(function(data) {
 			if (!opentransat.deepEqual(data, that.state.data)) {
+				that.eventBus.trigger(opentransat.events.new_data, data);
+
+				//on first data && large screen show side bar
+				if (that.state.data === null && window.innerWidth > 599) {
+					that.eventBus.trigger(opentransat.events.show_side_pane);
+				}
+
 				that.state.data = data;
+			} else {
+				that.eventBus.trigger(opentransat.events.new_data, that.state.data);
 			}
-			that.eventBus.trigger(opentransat.events.new_data, that.state.data);
 		})
 		.fail(function(jqxhr, textStatus, error) {
 			that.eventBus.trigger(opentransat.events.new_data_error, error);
