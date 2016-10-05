@@ -4,6 +4,10 @@ function toRadians($num) {
 	return $num * pi() / 180.0;
 }
 
+function toDeg($num) {
+	return $num * 180.0 / pi();
+}
+
 //http://www.movable-type.co.uk/scripts/latlong.html
 function getDistance($pos1, $pos2) {
     $R = 6371000.0; // metres
@@ -22,6 +26,15 @@ function getDistance($pos1, $pos2) {
 
     $d = $R * $c;
     return abs($d);
+}
+
+function getBearing($pos1, $pos2) {
+    $f1 = toRadians($pos1['gps_lat']);
+    $a1 = toRadians($pos1['gps_lng']);
+    $f2 = toRadians($pos2['gps_lat']);
+    $a2 = toRadians($pos2['gps_lng']);
+
+    return toDeg(atan2(sin($a2-$a1)*cos($f2), cos($f1)*sin($f2) - sin($f1) * cos($f2) * cos($a2-$a1)));
 }
 
 function getSpeed($pos1, $pos2) {
@@ -62,6 +75,7 @@ foreach ($json as $key => $item) {
 		$json[$key]['travel-time'] = 0;
 		$json[$key]['distance-air'] = 0.0;
 		$json[$key]['distance-diff'] = 0.0;
+		$json[$key]['bearing'] = 0;
 		$prev = $json[$key];
 		continue;
 	}
@@ -70,6 +84,8 @@ foreach ($json as $key => $item) {
 	$json[$key]['distance-air'] = getDistance($first, $item);
 	$json[$key]['speed'] = getSpeed($prev, $json[$key]);
 	$json[$key]['travel-time'] = strtotime($item['transmit_time']) - strtotime($first['transmit_time']);
+	$json[$key]['bearing'] = getBearing($prev, $item);
+
 	$prev = $json[$key];
 }
 

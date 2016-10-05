@@ -165,6 +165,11 @@ var map = {
 
 		var latlng;
 		var marker;
+		var keys = Object.keys(data);
+		var lastKey = keys.pop();
+		if (lastKey == 'comments') {
+			lastKey = keys.pop();
+		}
 		for (var i in data) {
 			if (i == 'comments') {
 				continue;
@@ -174,7 +179,7 @@ var map = {
 			latlng = L.latLng(p['gps_lat'], p['gps_lng']);
 			lines.push(latlng);
 
-			marker = this.createMarker(p, i).addTo(this.markersLayer);
+			marker = this.createMarker(p, i, i == lastKey).addTo(this.markersLayer);
 			this.markers.push(marker);
 		}
 
@@ -205,32 +210,46 @@ var map = {
 		}
 	},
 
-	createMarker: function (item, index) {
+	createMarker: function (item, index, last) {
 		var custom = item['custom'].split(';');
 		var color = 'red';
+		var classname;
 		if (item.device == 'iridium') {
 			color = '#00FF00';
+			classname = 'green';
 			if (custom[custom.length-1] == 'i') {
 				color = '#008000';
+				classname = 'dark-green';
 			}
 		}
 
 		if (item.device == 'spot2') {
 			color = '#FF0000';
+			classname = 'red';
 		}
 
 		if (item.device == 'spot3') {
 			color = '#FFFF00';
+			classname = 'yellow';
 		}
 
-		var marker = L.circleMarker([item['gps_lat'], item['gps_lng']], {
-			color: color,
-			radius: 0,
-			stroke: true,
-			fill: true,
-			opacity: 1,
-			weight: 10
-		});
+		var marker;
+		if (!last) {
+			marker = L.circleMarker([item['gps_lat'], item['gps_lng']], {
+				color: color,
+				radius: 0,
+				stroke: true,
+				fill: true,
+				opacity: 1,
+				weight: 10,
+				className: classname
+			});
+		} else {
+			marker = L.marker([item['gps_lat'], item['gps_lng']], {
+				icon: L.divIcon({className: 'head dot ' + classname, iconSize: [10, 10]}),
+			});
+		}
+
 		marker.my_data = index;
 		marker.on('mouseover', this.handleMouseMarker.bind(this));
 		marker.on('click', this.handleMouseMarker.bind(this));
