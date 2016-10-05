@@ -58,9 +58,17 @@ var opentransat = {
 	    return this.secToTime(seconds);
 	},
 
-	myround: function(x) {
-		return Math.round(x*1000000)/1000000;
-    },
+	angleToChar: function(angle) {
+		if (angle < 22.5) return '&uarr;';
+		else if (angle < 67.5) return '&nearr;';
+		else if (angle < 112.5) return '&rarr;';
+		else if (angle < 157.5) return '&searr;';
+		else if (angle < 202.5) return '&darr;';
+		else if (angle < 247.5) return '&swarr;';
+		else if (angle < 292.5) return '&larr;';
+		else if (angle < 337.5) return '&nwarr;';
+		else return '&uarr;';
+	},
 
     prepareLegend: function(data) {
 
@@ -94,6 +102,7 @@ var opentransat = {
 		
 		content += '<div><b>Estimated boat speed:</b> ' + data['speed'].toFixed(2) + ' km/h (' + Math.round(data['speed']*9/4.63 * 10)/10 + ' knots)</div>';
 		content += '<div><b>Estimated distance:</b> ' + (data['distance-total'] / 1000.0).toFixed(2) + ' km (' + (data['distance-air'] / 1000.0).toFixed(2) + ' km air line, ' + travelTimeStr + ')</div>';
+		content += '<div><b>Estimated heading:</b> ' + (data['est-heading']).toFixed() + '&deg; <b>' + this.angleToChar(data['est-heading']) + '</b></div>';
 		
 		if (device == 'iridium') {
 			for (var i in custom_arr) {
@@ -108,32 +117,26 @@ var opentransat = {
 					value *= custom_arr[i]['factor'];
 				if (title == 'Wind Angle') {
 					value = data['avg_heading'] - value;
-					if (value < 0) value += 360;
-					if (value > 360) value -= 360;
+					value += 360;
+					value %= 360;
 				}
-				value = this.myround(value);
+				value = value.toFixed();
 				
 				var valstr = value + custom_arr[i]['sym'];
 
 				if (title.indexOf('Temperature') >= 0)
-					valstr += ' ('+this.myround(value*1.8 + 32)+' &deg;F)';
+					valstr += ' ('+Math.round(value*1.8 + 32)+' &deg;F)';
 				if (title.indexOf('Speed') >= 0)
 					valstr += ' ('+Math.round(value*9/4.63 * 10)/10+' knots)';
 				if (title == 'Wind Angle') {
-					if (value < 22.5) valstr += ' <b>&uarr;</b>';
-					else if (value < 67.5) valstr += ' <b>&nearr;</b>';
-					else if (value < 112.5) valstr += ' <b>&rarr;</b>';
-					else if (value < 157.5) valstr += ' <b>&searr;</b>';
-					else if (value < 202.5) valstr += ' <b>&darr;</b>';
-					else if (value < 247.5) valstr += ' <b>&swarr;</b>';
-					else if (value < 292.5) valstr += ' <b>&larr;</b>';
-					else if (value < 337.5) valstr += ' <b>&nwarr;</b>';
-					else valstr += ' <b>&uarr;</b>';
+					valstr += ' <b>' + this.angleToChar(value) + '</b>';
+				}
+				if (title == 'Compass') {
+					valstr += ' <b>' + this.angleToChar(value) + '</b>';
 				}
 					
 				content += '<div><b>'+title+': </b>'+valstr+'</div>';
 			}
-			content += '<div><b>Avg. Heading: </b>'+data['avg_heading']+'&deg;</div>';
 		}
 
 	  	content += '</div>';
