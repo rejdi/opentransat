@@ -291,11 +291,16 @@ html, body {
 }
 
 @keyframes pulse {
-	from {
+	0% {
 		transform: scale(0.5);
+		opacity: 0;
 	}
-	to {
+	50% {
+		opacity: 1;
+	}
+	100% {
 		transform: scale(1.5);
+		opacity: 0;
 	}
 }
 
