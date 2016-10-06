@@ -120,7 +120,7 @@ var opentransat = {
 					value += 360;
 					value %= 360;
 				}
-				value = value.toFixed();
+				value = Math.round(value*1000000)/1000000;
 				
 				var valstr = value + custom_arr[i]['sym'];
 
