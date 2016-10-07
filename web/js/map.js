@@ -195,13 +195,10 @@ var map = {
 		}
 
 		this.lines.setLatLngs(lines);
-		this.currentMarker.setLatLng(lines[lines.length-1]);
 
 		if (diff > 0 && len === 0) {
 			//initial zoom
 			this.map.fitBounds(lines);
-
-			this.currentMarker.addTo(this.linesLayer).bringToBack();
 			this.lines.bringToBack();
 		} else if (diff > 0) {
 			var currentBounds = this.map.getBounds();
@@ -284,35 +281,50 @@ var map = {
 		if (index === this.state.selected_marker_index) {
 			return;
 		}
-		this.state.selected_marker_index = index;
-		this.state.selected_comment_index = null;
 
 		var point = this.state.data[index];
-		//this.legend.setText(opentransat.prepareLegend(point));
+		
 		var lat = parseFloat(point['gps_lat']),
 			lng = parseFloat(point['gps_lng']);
+
+		this.currentMarker.setLatLng([lat, lng]);
 
 		if (!this.map.getBounds().contains([lat, lng])) {
 			this.map.panTo([lat, lng], {animate: true});
 		}
 
-		return this.currentMarker.setLatLng([lat, lng]);
+		if (this.state.selected_marker_index === null) {
+			this.currentMarker.addTo(this.linesLayer).bringToBack();
+			this.lines.bringToBack();
+		}
+
+		this.state.selected_marker_index = index;
+		this.state.selected_comment_index = null;
+
+		return true;
 	},
 
 	select_comment: function (event, index) {
 		if (index === this.state.selected_comment_index) {
 			return;
 		}
-		this.state.selected_comment_index = index;
-		this.state.selected_marker_index = null;
 
 		var comment = this.state.data['comments'][index];
-		//this.legend.setText(opentransat.prepareComment(comment));
+
+		this.currentMarker.setLatLng([comment[0], comment[1]]);
 
 		if (!this.map.getBounds().contains([comment[0], comment[1]])) {
 			this.map.panTo([comment[0], comment[1]], {animate: true});
 		}
 
-		return this.currentMarker.setLatLng([comment[0], comment[1]]);
+		if (this.state.selected_comment_index === null) {
+			this.currentMarker.addTo(this.linesLayer).bringToBack();
+			this.linesLayer.bringToBack();
+		}
+
+		this.state.selected_comment_index = index;
+		this.state.selected_marker_index = null;
+
+		return true;
 	}
 };

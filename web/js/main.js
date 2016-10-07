@@ -38,6 +38,14 @@ var app = {
 					that.eventBus.trigger(opentransat.events.show_side_pane);
 				}
 
+				var keys = Object.keys(data);
+				var last = keys.pop();
+				if (last === 'comments') {
+					last = keys.pop();
+				}
+
+				that.eventBus.trigger(opentransat.events.on_marker_selected, last);
+
 				that.state.data = data;
 			} else {
 				that.eventBus.trigger(opentransat.events.new_data, that.state.data);

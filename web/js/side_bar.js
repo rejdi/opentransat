@@ -157,21 +157,17 @@ var side_bar = {
 		this.state.data = data;
 		this.marker_panel.empty();
 		this.comment_panel.empty();
-		var p;
 		for (var i in data) {
 			if (i == 'comments') {
 				continue;
 			}
-			p = data[i];
 			this.marker_panel.prepend(
 				'<div class="marker" target="'+i+'">' +
 					'<div class="header">' +
-						opentransat.prepareLegendHeader(p) +
+						opentransat.prepareLegendHeader(data[i]) +
 					'</div>' +
 				'</div>');
 		}
-
-		this.select_marker(p['transmit_time']);
 
 		var that = this;
 		if (data['comments']) {
