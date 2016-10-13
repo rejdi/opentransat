@@ -84,8 +84,8 @@ var map = {
 			'Ocean map': this.sources.oceanBaseMap,
 			'National Geographics': this.sources.nationalGeo,
 			'OSM Mapnik': this.sources.osmBase,
-			'Google Satelite': this.sources.googleSatelite,
-			'Google Terrain': this.sources.googleTerrain
+			//'Google Satelite': this.sources.googleSatelite,
+			//'Google Terrain': this.sources.googleTerrain
 		};
 
 		var overlays = {
