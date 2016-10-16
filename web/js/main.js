@@ -32,6 +32,10 @@ var app = {
 			if (!opentransat.deepEqual(data, that.state.data)) {
 				that.eventBus.trigger(opentransat.events.new_data, data);
 				that.loading.toggleClass('hidden', true);
+				//FF workaround. Still calculating CSS3 animation even when element is hidden.
+				setTimeout(function() {
+					that.loading.remove();
+				}, 1500);
 
 				//on first data && large screen show side bar
 				if (that.state.data === null && window.innerWidth > 599) {
